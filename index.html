@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Editor</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+
+        #textBox {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            resize: none;
+            font-size: 16px;
+        }
+
+        .counter {
+            text-align: right;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #ddd;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+
+        .entry-display {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background: #fafafa;
+            font-size: 14px;
+        }
+
+        .entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .entry:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <textarea id="textBox" placeholder="Type here..."></textarea>
+        <div class="counter" id="counter" contenteditable="true" title="Edit character limit">0/100</div>
+        <div class="color-palette">
+            <div class="color-swatch" style="background: #ff0000;" data-color="#ff0000"></div>
+            <div class="color-swatch" style="background: #00ff00;" data-color="#00ff00"></div>
+            <div class="color-swatch" style="background: #0000ff;" data-color="#0000ff"></div>
+            <div class="color-swatch" style="background: #ffff00;" data-color="#ffff00"></div>
+            <div class="color-swatch" style="background: #00ffff;" data-color="#00ffff"></div>
+            <div class="color-swatch" style="background: #ff00ff;" data-color="#ff00ff"></div>
+        </div>
+        <div class="entry-display" id="entryDisplay"></div>
+    </div>
+
+    <script>
+        const textBox = document.getElementById('textBox');
+        const counter = document.getElementById('counter');
+        const colorSwatches = document.querySelectorAll('.color-swatch');
+        const entryDisplay = document.getElementById('entryDisplay');
+
+        let charLimit = 100; // Default character limit
+
+        // Character counter
+        textBox.addEventListener('input', () => {
+            const count = textBox.value.length;
+
+            if (count > charLimit) {
+                textBox.value = textBox.value.substring(0, charLimit); // Trim excess characters
+            }
+
+            counter.textContent = `${textBox.value.length}/${charLimit}`;
+            counter.style.color = textBox.value.length === charLimit ? 'red' : '#666';
+        });
+
+        // Allow editing the character limit in place
+        counter.addEventListener('blur', () => {
+            const newLimit = parseInt(counter.textContent.split('/')[1], 10);
+            if (!isNaN(newLimit) && newLimit > 0) {
+                charLimit = newLimit;
+                counter.textContent = `${textBox.value.length}/${charLimit}`;
+            } else {
+                counter.textContent = `${textBox.value.length}/${charLimit}`; // Reset to valid limit
+            }
+        });
+
+        // Color palette
+        colorSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                const color = swatch.getAttribute('data-color');
+                textBox.style.color = color;
+            });
+        });
+
+        // Save entries on "Enter" key press
+        textBox.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent newline in the textarea
+                const entry = textBox.value.trim();
+                if (entry) {
+                    const entryElement = document.createElement('div');
+                    entryElement.className = 'entry';
+                    entryElement.textContent = entry;
+                    entryElement.style.color = textBox.style.color; // Preserve the text color
+                    entryDisplay.appendChild(entryElement);
+                    textBox.value = ''; // Clear the textbox
+                    counter.textContent = `0/${charLimit}`; // Reset counter
+                }
+            }
+        });
+    </script>
+</body>
+</html>
